@@ -1,5 +1,5 @@
 import { App, TFile } from "obsidian";
-import { parseFollowUps } from "./parser";
+import { parseFollowUps, shouldIndexPath } from "./parser";
 import type { FollowUpItem } from "./types";
 
 type IndexListener = () => void;
@@ -14,13 +14,22 @@ export class FollowUpIndex {
 
   async scanAll(): Promise<void> {
     if (this.disposed) return;
-    const files = this.app.vault.getMarkdownFiles();
-    await Promise.all(files.map((file) => this.reindexFile(file, false)));
+    const files = this.app.vault
+      .getMarkdownFiles()
+      .filter((file) => shouldIndexPath(file.path));
+
+    for (let offset = 0; offset < files.length; offset += 8) {
+      if (this.disposed) return;
+      const batch = files.slice(offset, offset + 8);
+      await Promise.all(batch.map((file) => this.reindexFile(file, false)));
+      await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    }
+
     if (!this.disposed) this.emit();
   }
 
   schedule(file: TFile): void {
-    if (this.disposed) return;
+    if (this.disposed || !shouldIndexPath(file.path)) return;
 
     const existing = this.pending.get(file.path);
     if (existing !== undefined) window.clearTimeout(existing);
@@ -34,7 +43,7 @@ export class FollowUpIndex {
   }
 
   async reindexFile(file: TFile, notify = true): Promise<void> {
-    if (this.disposed || file.extension !== "md") return;
+    if (this.disposed || file.extension !== "md" || !shouldIndexPath(file.path)) return;
 
     try {
       const content = await this.app.vault.read(file);

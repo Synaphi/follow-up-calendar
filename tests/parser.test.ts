@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { parseFollowUps } from "../src/parser";
+import { parseFollowUps, shouldIndexPath } from "../src/parser";
 import { sortNewestFirst, type FollowUpItem } from "../src/types";
 
 describe("parseFollowUps", () => {
@@ -115,5 +115,14 @@ describe("sortNewestFirst", () => {
       "middle",
       "old"
     ]);
+  });
+});
+
+describe("shouldIndexPath", () => {
+  it("ignores development and Obsidian internals", () => {
+    expect(shouldIndexPath("Notes/Tasks.md")).toBe(true);
+    expect(shouldIndexPath("Project/node_modules/pkg/README.md")).toBe(false);
+    expect(shouldIndexPath("Project/.git/description.md")).toBe(false);
+    expect(shouldIndexPath(".obsidian/plugins/example/README.md")).toBe(false);
   });
 });

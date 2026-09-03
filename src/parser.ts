@@ -162,3 +162,7 @@ export function parseFollowUps(content: string, filePath: string): FollowUpItem[
 
   return items;
 }
+
+export function shouldIndexPath(filePath: string): boolean {
+  return !/(^|\/)(?:node_modules|\.git|\.obsidian)(?:\/|$)/u.test(filePath);
+}
