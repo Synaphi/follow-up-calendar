@@ -1,4 +1,4 @@
-import { App, TFile } from "obsidian";
+import { App, TFile, getAllTags } from "obsidian";
 import { parseFollowUps, shouldIndexPath } from "./parser";
 import type { FollowUpItem } from "./types";
 
@@ -16,7 +16,12 @@ export class FollowUpIndex {
     if (this.disposed) return;
     const files = this.app.vault
       .getMarkdownFiles()
-      .filter((file) => shouldIndexPath(file.path));
+      .filter((file) => shouldIndexPath(file.path))
+      .filter((file) => {
+        const cache = this.app.metadataCache.getFileCache(file);
+        if (!cache) return true;
+        return getAllTags(cache)?.includes("#follow-up") ?? false;
+      });
 
     for (let offset = 0; offset < files.length; offset += 8) {
       if (this.disposed) return;
