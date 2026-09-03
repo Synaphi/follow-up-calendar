@@ -1,0 +1,10 @@
+{
+  "id": "follow-up-calendar",
+  "name": "Follow-up Calendar",
+  "version": "0.1.0",
+  "minAppVersion": "1.8.0",
+  "description": "Show dated follow-up tasks in a live calendar and concise list.",
+  "author": "Synaphi",
+  "authorUrl": "https://github.com/Synaphi",
+  "isDesktopOnly": true
+}
