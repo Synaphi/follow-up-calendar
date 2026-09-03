@@ -1,17 +1,19 @@
 import { App, MarkdownView, Notice, TFile } from "obsidian";
+import { translate, type UiLanguage } from "./i18n";
 import { updateCheckboxInSource } from "./source-text";
 import type { FollowUpItem } from "./types";
 
 export class SourceWriter {
   constructor(
     private readonly app: App,
-    private readonly refreshFile: (file: TFile) => Promise<void>
+    private readonly refreshFile: (file: TFile) => Promise<void>,
+    private readonly getLanguage: () => UiLanguage
   ) {}
 
   async setCompleted(item: FollowUpItem, completed: boolean): Promise<boolean> {
     const abstractFile = this.app.vault.getAbstractFileByPath(item.filePath);
     if (!(abstractFile instanceof TFile)) {
-      new Notice("원본 파일을 찾을 수 없습니다.");
+      new Notice(translate(this.getLanguage(), "sourceMissing"));
       return false;
     }
 
@@ -21,7 +23,7 @@ export class SourceWriter {
 
       if (result.kind === "conflict") {
         await this.refreshFile(abstractFile);
-        new Notice("원본이 변경되어 다시 불러왔습니다. 한 번 더 눌러 주세요.");
+        new Notice(translate(this.getLanguage(), "sourceChanged"));
         return false;
       }
 
@@ -32,7 +34,7 @@ export class SourceWriter {
       return true;
     } catch (error) {
       console.error("[Follow-up Calendar] Could not update the source task.", error);
-      new Notice("원본 일정을 수정하지 못했습니다.");
+      new Notice(translate(this.getLanguage(), "sourceUpdateFailed"));
       return false;
     }
   }
@@ -40,7 +42,7 @@ export class SourceWriter {
   async openSource(item: FollowUpItem): Promise<void> {
     const abstractFile = this.app.vault.getAbstractFileByPath(item.filePath);
     if (!(abstractFile instanceof TFile)) {
-      new Notice("원본 파일을 찾을 수 없습니다.");
+      new Notice(translate(this.getLanguage(), "sourceMissing"));
       return;
     }
 

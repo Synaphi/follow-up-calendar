@@ -6,18 +6,21 @@ import {
   Setting,
   TFile,
   TFolder,
+  moment,
   normalizePath,
   type App
 } from "obsidian";
+import { resolveLanguage, translate, type UiLanguage } from "./i18n";
 import { FollowUpIndex } from "./indexer";
 import { SourceWriter } from "./source-writer";
-import type { FollowUpCalendarSettings, WeekStart } from "./types";
+import type { FollowUpCalendarSettings, LanguagePreference, WeekStart } from "./types";
 import { FollowUpRenderChild } from "./views";
 
 const DEFAULT_SETTINGS: FollowUpCalendarSettings = {
   hubPath: "Follow-up Calendar.md",
   weekStart: "monday",
-  showCompleted: false
+  showCompleted: false,
+  language: "auto"
 };
 
 const HUB_TEMPLATE = `---
@@ -25,12 +28,8 @@ follow_up_calendar_hub: true
 cssclasses: [follow-up-calendar-hub]
 ---
 
-# Follow-up Calendar
-
 \`\`\`follow-up-calendar
 \`\`\`
-
-## List
 
 \`\`\`follow-up-list
 \`\`\`
@@ -45,15 +44,19 @@ export default class FollowUpCalendarPlugin extends Plugin {
   async onload(): Promise<void> {
     await this.loadSettings();
     this.index = new FollowUpIndex(this.app);
-    this.writer = new SourceWriter(this.app, (file) => this.index.reindexFile(file));
+    this.writer = new SourceWriter(
+      this.app,
+      (file) => this.index.reindexFile(file),
+      () => this.language
+    );
 
-    this.addRibbonIcon("calendar-check-2", "Follow-up Calendar", () => {
+    this.addRibbonIcon("calendar-check-2", translate(this.language, "calendarTitle"), () => {
       void this.openHub();
     }).addClass("follow-up-calendar-ribbon");
 
     this.addCommand({
       id: "open-follow-up-calendar",
-      name: "Open Follow-up Calendar",
+      name: translate(this.language, "openCommand"),
       callback: () => void this.openHub()
     });
 
@@ -66,7 +69,8 @@ export default class FollowUpCalendarPlugin extends Plugin {
           source,
           this.index,
           this.writer,
-          () => this.settings
+          () => this.settings,
+          () => this.language
         )
       );
     });
@@ -80,7 +84,8 @@ export default class FollowUpCalendarPlugin extends Plugin {
           source,
           this.index,
           this.writer,
-          () => this.settings
+          () => this.settings,
+          () => this.language
         )
       );
     });
@@ -121,6 +126,10 @@ export default class FollowUpCalendarPlugin extends Plugin {
     this.index.refreshViews();
   }
 
+  get language(): UiLanguage {
+    return resolveLanguage(this.settings.language, moment.locale());
+  }
+
   private async loadSettings(): Promise<void> {
     const loaded = (await this.loadData()) as Partial<FollowUpCalendarSettings> | null;
     this.settings = { ...DEFAULT_SETTINGS, ...(loaded ?? {}) };
@@ -132,7 +141,7 @@ export default class FollowUpCalendarPlugin extends Plugin {
     this.openingHub = this.doOpenHub()
       .catch((error) => {
         console.error("[Follow-up Calendar] Could not open the hub note.", error);
-        new Notice("Follow-up Calendar 노트를 열지 못했습니다.");
+        new Notice(translate(this.language, "hubOpenFailed"));
       })
       .finally(() => {
         this.openingHub = null;
@@ -146,7 +155,7 @@ export default class FollowUpCalendarPlugin extends Plugin {
 
     let abstractFile = this.app.vault.getAbstractFileByPath(path);
     if (abstractFile instanceof TFolder) {
-      new Notice("허브 경로가 폴더와 겹칩니다. 설정에서 파일 경로를 바꿔 주세요.");
+      new Notice(translate(this.language, "hubFolderConflict"));
       return;
     }
 
@@ -199,12 +208,29 @@ class FollowUpCalendarSettingTab extends PluginSettingTab {
 
   display(): void {
     const { containerEl } = this;
+    const language = this.plugin.language;
     containerEl.empty();
     new Setting(containerEl).setName("Follow-up Calendar").setHeading();
 
     new Setting(containerEl)
-      .setName("허브 노트 경로")
-      .setDesc("리본 아이콘이 여는 Markdown 파일입니다.")
+      .setName(translate(language, "language"))
+      .setDesc(translate(language, "languageDesc"))
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOption("auto", translate(language, "automatic"))
+          .addOption("ko", translate(language, "korean"))
+          .addOption("en", translate(language, "english"))
+          .setValue(this.plugin.settings.language)
+          .onChange(async (value) => {
+            this.plugin.settings.language = value as LanguagePreference;
+            await this.plugin.saveSettings();
+            this.display();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName(translate(language, "hubPath"))
+      .setDesc(translate(language, "hubPathDesc"))
       .addText((text) =>
         text
           .setPlaceholder(DEFAULT_SETTINGS.hubPath)
@@ -216,12 +242,12 @@ class FollowUpCalendarSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("주 시작 요일")
-      .setDesc("달력의 첫 번째 요일입니다.")
+      .setName(translate(language, "weekStart"))
+      .setDesc(translate(language, "weekStartDesc"))
       .addDropdown((dropdown) =>
         dropdown
-          .addOption("monday", "월요일")
-          .addOption("sunday", "일요일")
+          .addOption("monday", translate(language, "monday"))
+          .addOption("sunday", translate(language, "sunday"))
           .setValue(this.plugin.settings.weekStart)
           .onChange(async (value) => {
             this.plugin.settings.weekStart = value as WeekStart;
@@ -230,8 +256,8 @@ class FollowUpCalendarSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("완료 일정 기본 표시")
-      .setDesc("달력과 리스트를 처음 열 때 완료 항목도 표시합니다.")
+      .setName(translate(language, "showCompletedDefault"))
+      .setDesc(translate(language, "showCompletedDefaultDesc"))
       .addToggle((toggle) =>
         toggle.setValue(this.plugin.settings.showCompleted).onChange(async (value) => {
           this.plugin.settings.showCompleted = value;

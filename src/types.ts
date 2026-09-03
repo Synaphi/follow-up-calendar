@@ -1,4 +1,5 @@
 export type WeekStart = "monday" | "sunday";
+export type LanguagePreference = "auto" | "en" | "ko";
 
 export interface FollowUpItem {
   id: string;
@@ -15,6 +16,7 @@ export interface FollowUpCalendarSettings {
   hubPath: string;
   weekStart: WeekStart;
   showCompleted: boolean;
+  language: LanguagePreference;
 }
 
 export interface FollowUpBlockOptions {
