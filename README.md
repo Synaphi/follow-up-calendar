@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="assets/follow-up-calendar-banner.png" alt="Follow-up Calendar — Dated tasks. Clear focus." width="100%">
-</p>
-
 # Follow-up Calendar
 
 **A simple, focused Obsidian calendar for dated follow-up tasks.**
