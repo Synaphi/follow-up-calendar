@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
 import { parseFollowUps, shouldIndexPath } from "../src/parser";
-import { sortNewestFirst, type FollowUpItem } from "../src/types";
 
 describe("parseFollowUps", () => {
   it("accepts only tasks with both the calendar marker and exact follow-up tag", () => {
@@ -91,30 +90,6 @@ describe("parseFollowUps", () => {
 
     const items = parseFollowUps(content, "Tasks.md");
     expect(items[0].title).toBe("Project · review report soon");
-  });
-});
-
-describe("sortNewestFirst", () => {
-  it("puts the largest date at the top", () => {
-    const base = {
-      id: "id",
-      filePath: "Tasks.md",
-      line: 0,
-      rawLine: "raw",
-      title: "Task",
-      completed: false
-    };
-    const items: FollowUpItem[] = [
-      { ...base, id: "old", date: "2026-09-01" },
-      { ...base, id: "latest", date: "2026-12-31" },
-      { ...base, id: "middle", date: "2026-10-10" }
-    ];
-
-    expect(sortNewestFirst(items).map((item) => item.id)).toEqual([
-      "latest",
-      "middle",
-      "old"
-    ]);
   });
 });
 

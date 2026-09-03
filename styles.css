@@ -224,19 +224,32 @@
 
 .follow-up-calendar-item {
   --fuc-item-accent: var(--interactive-accent);
-  align-items: flex-start;
+  align-items: center;
   background: color-mix(in srgb, var(--fuc-item-accent) 9%, var(--fuc-surface-alt));
-  border-left: 2px solid color-mix(in srgb, var(--fuc-item-accent) 68%, transparent);
-  border-radius: 5px;
+  border: 1px solid color-mix(in srgb, var(--fuc-item-accent) 16%, var(--fuc-border));
+  border-radius: 6px;
   display: flex;
   gap: 0.3rem;
-  min-height: 1.75rem;
+  min-height: 1.6rem;
   min-width: 0;
-  padding: 0.25rem 0.35rem;
+  padding: 0.2rem 0.35rem;
 }
 
 .follow-up-calendar-item.is-overdue {
   --fuc-item-accent: var(--text-error);
+}
+
+.follow-up-calendar-item::before {
+  background: var(--fuc-item-accent);
+  border-radius: 999px;
+  content: "";
+  flex: 0 0 auto;
+  height: 6px;
+  width: 6px;
+}
+
+.follow-up-calendar-item .follow-up-calendar-checkbox {
+  display: none;
 }
 
 .follow-up-calendar-checkbox {
@@ -247,23 +260,22 @@
 }
 
 .follow-up-calendar-source-button {
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
   background: transparent;
   border: 0;
   box-shadow: none;
   color: inherit;
   cursor: pointer;
-  display: -webkit-box;
+  display: block;
   font: inherit;
-  font-size: var(--font-ui-smaller);
-  line-height: 1.25;
+  font-size: 11px;
+  line-height: 1.18;
   margin: 0;
   min-width: 0;
   overflow: hidden;
   padding: 0;
   text-align: left;
-  white-space: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .follow-up-calendar-source-button:hover {
@@ -345,7 +357,7 @@
 .follow-up-list-content .follow-up-calendar-source-button,
 .follow-up-day-modal-content .follow-up-calendar-source-button {
   display: block;
-  font-size: var(--font-ui-small);
+  font-size: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

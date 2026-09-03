@@ -24,14 +24,23 @@ export interface FollowUpBlockOptions {
   showCompleted?: boolean;
 }
 
-export function sortNewestFirst(items: readonly FollowUpItem[]): FollowUpItem[] {
+export function sortNearestFirst(
+  items: readonly FollowUpItem[],
+  today: string
+): FollowUpItem[] {
   return [...items].sort((left, right) => {
-    const dateOrder = right.date.localeCompare(left.date);
-    if (dateOrder !== 0) return dateOrder;
-
     if (left.completed !== right.completed) {
       return left.completed ? 1 : -1;
     }
+
+    const leftUpcoming = left.date >= today;
+    const rightUpcoming = right.date >= today;
+    if (leftUpcoming !== rightUpcoming) return leftUpcoming ? -1 : 1;
+
+    const dateOrder = leftUpcoming
+      ? left.date.localeCompare(right.date)
+      : right.date.localeCompare(left.date);
+    if (dateOrder !== 0) return dateOrder;
 
     const titleOrder = left.title.localeCompare(right.title, "ko");
     if (titleOrder !== 0) return titleOrder;

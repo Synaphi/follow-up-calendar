@@ -3,7 +3,7 @@ import { FollowUpIndex } from "./indexer";
 import { formatLongDate, formatMonth, translate, weekdayLabels, type UiLanguage } from "./i18n";
 import { SourceWriter } from "./source-writer";
 import {
-  sortNewestFirst,
+  sortNearestFirst,
   type FollowUpBlockOptions,
   type FollowUpCalendarSettings,
   type FollowUpItem,
@@ -305,13 +305,14 @@ export class FollowUpRenderChild extends MarkdownRenderChild {
 
   private renderList(): void {
     const language = this.getLanguage();
-    const items = sortNewestFirst(this.visibleItems());
+    const today = formatDateKey(new Date());
+    const items = sortNearestFirst(this.visibleItems(), today);
     const wrapper = this.containerEl.createDiv("follow-up-list");
     const header = wrapper.createDiv("follow-up-list-header");
     const heading = header.createDiv("follow-up-list-heading");
     heading.createEl("h3", { text: translate(language, "scheduleList") });
     heading.createSpan({ cls: "follow-up-calendar-count", text: String(items.length) });
-    header.createSpan({ cls: "follow-up-list-order", text: translate(language, "newestFirst") });
+    header.createSpan({ cls: "follow-up-list-order", text: translate(language, "nearestFirst") });
     this.createActionButton(
       header,
       this.showCompleted ? "eye-off" : "eye",
@@ -328,7 +329,6 @@ export class FollowUpRenderChild extends MarkdownRenderChild {
       return;
     }
 
-    const today = formatDateKey(new Date());
     const rows = wrapper.createDiv("follow-up-list-rows");
     for (const item of items) this.renderListItem(rows, item, today, language);
   }
