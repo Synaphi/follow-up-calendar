@@ -2,6 +2,14 @@
 
 **A simple, focused Obsidian calendar for dated follow-up tasks.**
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/synaphi-logo-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="assets/synaphi-logo-light.png">
+    <img src="assets/synaphi-logo-light.png" alt="SYNAPHI" width="320">
+  </picture>
+</p>
+
 It does one job: finds Markdown tasks containing both `📅 YYYY-MM-DD` and `#follow-up`, then shows them in a clean calendar and list. No project system, no complicated workflow.
 
 ```markdown
@@ -18,6 +26,22 @@ The plugin adds a calendar icon to the left ribbon. It opens a live calendar and
 - Copyable `follow-up-calendar` block for any note
 - Automatic Obsidian language detection plus manual English/Korean selection
 - Light and dark theme support using Obsidian theme variables
+
+## Actual plugin screens
+
+These are the real plugin views running inside Obsidian—not generated mockups.
+
+### Calendar
+
+<p align="center">
+  <img src="assets/calendar-view.png" alt="Follow-up Calendar running in Obsidian" width="760">
+</p>
+
+### Nearest upcoming list
+
+<p align="center">
+  <img src="assets/list-view.png" alt="Follow-up list running in Obsidian" width="760">
+</p>
 
 ## Install manually
 
